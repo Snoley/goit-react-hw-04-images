@@ -1,42 +1,38 @@
-import React from 'react';
-import { Component } from 'react';
+import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Modal, Overlay } from './Modal.Styled';
 
 const modalRoot = document.querySelector('#modal');
 
-class ModalWindow extends Component {
-  componentDidMount() {
-    document.addEventListener('keydown', this.handleKeyDown);
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('keydown', this.handleKeyDown);
-  }
-
-  handleKeyDown = (event) => {
-    const { keyCode } = event;
-    if (keyCode === 27) {
-      console.log('rrrr');
-      this.props.close();
+function ModalWindow(props) {
+  useEffect(() => {
+    function handleKeyDown(event) {
+      const { keyCode } = event;
+      if (keyCode === 27) {
+        props.close();
+      }
     }
-  };
 
-  handleBackdropClick = (event) => {
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [props]);
+
+  function handleBackdropClick(event) {
     const { target, currentTarget } = event;
     if (target === currentTarget) {
-      this.props.close();
+      props.close();
     }
-  };
-
-  render() {
-    return createPortal(
-      <Overlay onClick={this.handleBackdropClick}>
-        <Modal>{this.props.children}</Modal>
-      </Overlay>,
-      modalRoot
-    );
   }
+
+  return createPortal(
+    <Overlay onClick={handleBackdropClick}>
+      <Modal>{props.children}</Modal>
+    </Overlay>,
+    modalRoot
+  );
 }
 
 export default ModalWindow;
